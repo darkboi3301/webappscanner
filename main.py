@@ -13,7 +13,7 @@ st.set_page_config(
 )
 
 #st.title("WARP Scanner")
-st.markdown("<h1 style='text-align: center; color: white;font-size: 50px'>WARP Scanner</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: Black;font-size: 50px'>WARP Scanner</h1>", unsafe_allow_html=True)
 st.subheader("Input IP address or Domain ")
 scan_ip = st.text_input('example: 8.8.8.8 or scanme.nmap.org', 'Enter Domain/IP here')
 
@@ -31,7 +31,7 @@ scanned_ip = ConvertToIP(scan_ip)
 
 def PortScanner(scanned_ip):
 	scanner = nmap.PortScanner()
-	scanner.scan(scanned_ip, '1-1024', "-sV T4 --script=vuln")
+	scanner.scan(scanned_ip, openports , "-sV T4")
 	for i in scanner.all_hosts():
 		if scanner[i].state() == 'up':
 			st.write(f"Host: {i} ({scanner[i].hostname()})")
@@ -47,19 +47,34 @@ def PortScanner(scanned_ip):
 	st.dataframe(df)
 	#st.write(scanner.traceroute())
 	#perform a os detection scan on the target
-	st.write(scanner.scan(scanned_ip, arguments='-sV T4 --script=vuln'))
+	st.write(scanner.scan(scanned_ip, arguments='-sV T4 '))
+	
+def getopenports(scanned_ip):
+	opports=[]
+	for port in range(1,100):
+		soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		socket.setdefaulttimeout(1)
+		result = soc.connect_ex((scanned_ip,port))
+		if result ==0:
+			print("Port {} is open".format(port))
+			st.write(port,' is open, Saving for in depth scan')
+			opports.append(port)
+		else:
+			print(port,' is closed/unavailable')
+		soc.close()
+	return opports
 	
 
-
 if st.button("Scan"):
-	with st.spinner('Running'):
-		st.write(PortScanner(scanned_ip))
+	portsopen=getopenports(scanned_ip)
+	st.subheader("Open Ports")
+	print(portsopen)
+	st.write(portsopen)
 
 st.markdown(
     """
     <style>
-		background-color: #000000;
-        footer {
+		footer {
             visibility: hidden;
         }
     </style>
