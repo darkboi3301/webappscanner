@@ -28,7 +28,7 @@ def ConvertToIP(scan_ip):
 		return "Invalid Domain"
 	
 
-def PortScannerV2(scanned_ip,portsopen):
+def PortScannerOS(scanned_ip,portsopen):
 	scanner = nmap.PortScanner()
 	scanner.scan(scanned_ip, arguments='-sV -T4 -p' + portsopen)
 	for i in scanner.all_hosts():
@@ -73,7 +73,7 @@ if st.button("Scan"):
 	st.subheader("Open Ports")
 	print(str(portsopen))
 	st.write(portsopen)
-	PortScannerV2(scanned_ip,portsopen)
+	PortScannerOS(scanned_ip,portsopen)
 
 st.markdown(
     """
