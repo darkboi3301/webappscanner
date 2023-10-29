@@ -30,7 +30,10 @@ st.markdown("<h1 style='text-align: center; color: Black;font-size: 50px'>WARP S
 st.subheader("Input IP address or Domain ")
 scan_ip = st.text_input('example: 8.8.8.8 or scanme.nmap.org', 'scanme.nmap.org')
 
-
+#get port range from user in st numeber input
+st.subheader("Select Port Range")
+port_range_start = st.number_input("Port Range Start", min_value=1, max_value=65535, value=1, step=1)
+port_range_end = st.number_input("Port Range End", min_value=1, max_value=65535, value=100, step=1)
 
 def ConvertToIP(scan_ip):
 	try:
@@ -55,6 +58,8 @@ def PortScannerOS(scanned_ip,portsopen):
 					st.write(f"Port: {port} \t State: {scanner[i][protocols][port]['state']}")
 	df = pd.read_csv(StringIO(scanner.csv()), index_col=0, sep=";")
 	st.dataframe(df,use_container_width=True)
+	st.write(scanner.csv())
+
 
 def PortScannerSV(scanned_ip,portsopen):
 	scanner = nmap.PortScanner()
@@ -70,6 +75,8 @@ def PortScannerSV(scanned_ip,portsopen):
 					st.write(f"Port: {port} \t State: {scanner[i][protocols][port]['state']}")
 	df = pd.read_csv(StringIO(scanner.csv()), index_col=0, sep=";")
 	st.dataframe(df,use_container_width=True)
+	st.write(scanner.csv())
+
 
 	
 
@@ -77,7 +84,7 @@ def PortScannerSV(scanned_ip,portsopen):
 
 def getopenports(scanned_ip):
 	opports=""
-	for port in range(1,100):
+	for port in range(port_range_start,port_range_end):
 		soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		socket.setdefaulttimeout(2)
 		result = soc.connect_ex((scanned_ip,port))
@@ -107,6 +114,31 @@ if st.button("SV Scan"):
 	st.write(portsopen)
 	PortScannerSV(scanned_ip,portsopen)
 
+script = st.selectbox("select your NSE script",["auth","broadcast","brute","default","discovery","dos","exploit","external","fuzzer","intrusive","malware","safe","version","vuln"])
+
+if st.button("NSE Scan"):
+	scanned_ip = ConvertToIP(scan_ip)
+	portsopen=getopenports(scanned_ip)
+	st.subheader("Open Ports")
+	print(str(portsopen))
+	st.write(portsopen)
+	scanner = nmap.PortScanner()
+	scanner.scan(scanned_ip, arguments='--script ' + script + ' -T4 -p' + portsopen)
+	for i in scanner.all_hosts():
+		if scanner[i].state() == 'up':
+			st.write(f"Host: {i} ({scanner[i].hostname()})")
+			st.write(f"State: {scanner[i].state()}")
+			for protocols in scanner[i].all_protocols():
+				st.write(f"Protocol: {protocols}")
+				lport = scanner[i][protocols].keys()
+				for port in lport:
+					st.write(f"Port: {port} \t State: {scanner[i][protocols][port]['state']}")
+	df = pd.read_csv(StringIO(scanner.csv()), index_col=0, sep=";")
+	st.dataframe(df,use_container_width=True)
+	st.write(scanner.csv())
+	st.code(scanner.scaninfo(),language = "json")
+
+	
 st.markdown(
     """
     <style>
