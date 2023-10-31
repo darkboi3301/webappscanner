@@ -10,22 +10,6 @@ st.set_page_config(
     page_title="WARP", page_icon="🚀", initial_sidebar_state="auto", layout="wide"
 )
 
-
-st.markdown(
-    """
-    <style>
-    .reportview-container {
-        background: url("https://images.app.goo.gl/LFCobouKtT7oZ7Qv7")
-    }
-   .sidebar .sidebar-content {
-        background: url("https://images.app.goo.gl/LFCobouKtT7oZ7Qv7")
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
-
 # st.title("WARP Scanner")
 st.markdown(
     "<h1 style='text-align: center; color: Black;font-size: 50px'>WARP Scanner</h1>",
@@ -34,7 +18,7 @@ st.markdown(
 st.subheader("Input IP address or Domain ")
 scan_ip = st.text_input("example: 8.8.8.8 or scanme.nmap.org", "scanme.nmap.org")
 
-# get port range from user in st numeber input
+# get port range from user in st number input
 st.subheader("Select Port Range")
 port_range_start = st.number_input(
     "Port Range Start", min_value=1, max_value=65535, value=1, step=1
@@ -52,7 +36,7 @@ def ConvertToIP(scan_ip):
         st.write("Invalid Domain")
         return "Invalid Domain"
 
-
+#Scan for OS detection
 def PortScannerOS(scanned_ip, portsopen):
     scanner = nmap.PortScanner()
     scanner.scan(scanned_ip, arguments="-O -T4 -p" + portsopen)
